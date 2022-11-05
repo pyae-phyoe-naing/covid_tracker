@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white70.withOpacity(.7),
       appBar: AppBar(
         title: const Text('Covid Tracker'),
         centerTitle: true,
