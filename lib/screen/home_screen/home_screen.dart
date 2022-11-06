@@ -24,11 +24,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white70.withOpacity(.7),
+     // backgroundColor: Colors.white70.withOpacity(.7),
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         title: const Text('Covid Tracker'),
-        centerTitle: true,
+       // centerTitle: true,
         backgroundColor: Colors.deepPurple,
+        actions: [
+          IconButton(onPressed: ()=> _homeBloc.getCovidSummaryData(), icon:const Icon(Icons.search,size:30,)),
+          //IconButton(onPressed: ()=> _homeBloc.getCovidSummaryData(), icon:const Icon(Icons.refresh)),
+        ],
       ),
       body: StreamBuilder<ResponseOb>(
         stream: _homeBloc.getCovidSummaryStream(),
