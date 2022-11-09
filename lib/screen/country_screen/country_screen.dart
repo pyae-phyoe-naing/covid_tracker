@@ -14,6 +14,9 @@ class CountryScreen extends StatefulWidget {
 
 class _CountryScreenState extends State<CountryScreen> {
   final CountryBloc _countryBloc = CountryBloc();
+  final TextEditingController _searchController = TextEditingController();
+  List<CountryOb> countries = [];
+  List<CountryOb> filterCountries = [];
 
   @override
   void initState() {
@@ -28,35 +31,65 @@ class _CountryScreenState extends State<CountryScreen> {
       appBar: AppBar(
         title: const Text('Select Country'),
         backgroundColor: Colors.deepPurple,
+        centerTitle: true,
       ),
-      body: StreamBuilder<ResponseOb>(
-        stream: _countryBloc.getCountryStream(),
-        initialData: ResponseOb(msgState: MsgState.loading),
-        builder: (BuildContext context, AsyncSnapshot<ResponseOb> snapshot) {
-          ResponseOb responseOb = snapshot.data!;
-          if (responseOb.msgState == MsgState.data) {
-            List<CountryOb> countries = responseOb.data;
-            return SelectCountryWidget(countries);
-          } else if (responseOb.msgState == MsgState.error) {
-            if (responseOb.errState == ErrState.serverErr) {
-              return const Center(
-                child: Text('500\nServer Error'),
-              );
-            } else if (responseOb.errState == ErrState.notFoundErr) {
-              return const Center(
-                child: Text('404\nPage Not Found'),
-              );
-            } else {
-              return const Center(
-                child: Text('Unknown Error'),
-              );
-            }
-          } else {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          children: [
+            TextField(
+              onChanged: (str) {
+                if (str.isEmpty) {
+                  filterCountries = [];
+                } else {
+                  filterCountries = countries.where((CountryOb co) {
+                    return co.country!
+                        .toLowerCase()
+                        .contains(str.toLowerCase());
+                  }).toList();
+                }
+                setState(() {});
+              },
+              controller: _searchController,
+              decoration: const InputDecoration(labelText: 'Search City'),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Expanded(
+              child: StreamBuilder<ResponseOb>(
+                stream: _countryBloc.getCountryStream(),
+                initialData: ResponseOb(msgState: MsgState.loading),
+                builder:
+                    (BuildContext context, AsyncSnapshot<ResponseOb> snapshot) {
+                  ResponseOb responseOb = snapshot.data!;
+                  if (responseOb.msgState == MsgState.data) {
+                    countries = responseOb.data;
+                    return selectCountryWidget(countries, filterCountries,_searchController.text);
+                  } else if (responseOb.msgState == MsgState.error) {
+                    if (responseOb.errState == ErrState.serverErr) {
+                      return const Center(
+                        child: Text('500\nServer Error'),
+                      );
+                    } else if (responseOb.errState == ErrState.notFoundErr) {
+                      return const Center(
+                        child: Text('404\nPage Not Found'),
+                      );
+                    } else {
+                      return const Center(
+                        child: Text('Unknown Error'),
+                      );
+                    }
+                  } else {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
