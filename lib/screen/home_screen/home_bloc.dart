@@ -8,14 +8,14 @@ import 'package:http/http.dart' as http;
 
 class HomeBloc {
   final StreamController<ResponseOb> _controller =
-      StreamController<ResponseOb>();
+      StreamController<ResponseOb>.broadcast();
 
   Stream<ResponseOb> getCovidSummaryStream() => _controller.stream;
 
   getCovidSummaryData() async {
 
     ResponseOb responseOb = ResponseOb(msgState: MsgState.loading);
-    _controller.sink.add(responseOb);
+    //_controller.sink.add(responseOb);
 
     var response = await http.get(Uri.parse(summaryUrl));
     if (response.statusCode == 200) {

@@ -1,11 +1,15 @@
 import 'package:covid_tracker/model/summary_ob.dart';
+import 'package:covid_tracker/screen/home_screen/home_bloc.dart';
 import 'package:covid_tracker/widget/countries_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-Widget homeMainWidget(SummaryOb summaryOb) {
+
+Widget homeMainWidget(SummaryOb summaryOb,HomeBloc homeBloc,RefreshController refreshController) {
+
   var global = summaryOb.global!;
-  var countries = summaryOb.countries!; 
+  var countries = summaryOb.countries!;
   var numberFormat = NumberFormat(',###', 'en_US');
   return Column(
     children: [
@@ -58,7 +62,8 @@ Widget homeMainWidget(SummaryOb summaryOb) {
                               style: const TextStyle(color: Colors.black54),
                               children: [
                                 TextSpan(
-                                    text: numberFormat.format(global.newConfirmed),
+                                    text: numberFormat
+                                        .format(global.newConfirmed),
                                     style: const TextStyle(
                                         color: Colors.blue,
                                         fontWeight: FontWeight.bold))
@@ -81,7 +86,7 @@ Widget homeMainWidget(SummaryOb summaryOb) {
                           height: 10,
                         ),
                         Text(
-                          numberFormat.format(global.totalDeaths) ,
+                          numberFormat.format(global.totalDeaths),
                           style: const TextStyle(
                               color: Colors.red,
                               fontWeight: FontWeight.bold,
@@ -96,7 +101,7 @@ Widget homeMainWidget(SummaryOb summaryOb) {
                               style: const TextStyle(color: Colors.black54),
                               children: [
                                 TextSpan(
-                                    text:numberFormat.format(global.newDeaths),
+                                    text: numberFormat.format(global.newDeaths),
                                     style: const TextStyle(
                                         color: Colors.red,
                                         fontWeight: FontWeight.bold))
@@ -119,7 +124,7 @@ Widget homeMainWidget(SummaryOb summaryOb) {
                           height: 10,
                         ),
                         Text(
-                         numberFormat.format(global.totalRecovered),
+                          numberFormat.format(global.totalRecovered),
                           style: const TextStyle(
                               color: Colors.green,
                               fontWeight: FontWeight.bold,
@@ -134,7 +139,8 @@ Widget homeMainWidget(SummaryOb summaryOb) {
                               style: const TextStyle(color: Colors.black54),
                               children: [
                                 TextSpan(
-                                    text: numberFormat.format(global.newRecovered) ,
+                                    text: numberFormat
+                                        .format(global.newRecovered),
                                     style: const TextStyle(
                                         color: Colors.green,
                                         fontWeight: FontWeight.bold))
@@ -151,30 +157,49 @@ Widget homeMainWidget(SummaryOb summaryOb) {
       ),
 
       // Countries
-     const  Divider(color: Colors.deepPurpleAccent),
-      const SizedBox(height: 5,),
+      const Divider(color: Colors.deepPurpleAccent),
+      const SizedBox(
+        height: 5,
+      ),
       Padding(
-        padding: const EdgeInsets.only(left:20.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children:const[
-            Icon(Icons.home_work_outlined,color: Colors.deepPurple,),
-            SizedBox(width:5,),
-            Text(
+        padding: const EdgeInsets.only(left: 20.0),
+        child: Row(mainAxisAlignment: MainAxisAlignment.start, children: const [
+          Icon(
+            Icons.home_work_outlined,
+            color: Colors.deepPurple,
+          ),
+          SizedBox(
+            width: 5,
+          ),
+          Text(
             ' နိူင်ငံအားလုံး',
             style: TextStyle(
-                fontSize: 17, fontWeight: FontWeight.bold, color: Colors.deepPurple),
-          ),]
-        ),
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepPurple),
+          ),
+        ]),
       ),
-       const SizedBox(height: 5,),
-      const Divider(color: Colors.grey,),
+      const SizedBox(
+        height: 5,
+      ),
+      const Divider(
+        color: Colors.grey,
+      ),
       Expanded(
-        child: ListView.builder(
-            itemCount: countries.length,
-            itemBuilder: (BuildContext context, index) {
-              return CountriesWidget(country: countries[index]);
-            }),
+        child: SmartRefresher(
+          controller: refreshController,
+          enablePullDown: true,
+          header: const WaterDropHeader(),
+          onRefresh: () {
+            homeBloc.getCovidSummaryData();
+          },
+          child: ListView.builder(
+              itemCount: countries.length,
+              itemBuilder: (BuildContext context, index) {
+                return CountriesWidget(country: countries[index]);
+              }),
+        ),
       ),
     ],
   );

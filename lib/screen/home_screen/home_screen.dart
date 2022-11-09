@@ -3,6 +3,7 @@ import 'package:covid_tracker/model/summary_ob.dart';
 import 'package:covid_tracker/screen/search_screen/search_screen.dart';
 import 'package:covid_tracker/widget/home_main_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'home_bloc.dart';
 
@@ -15,12 +16,17 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final HomeBloc _homeBloc = HomeBloc();
-
+  RefreshController refreshController = RefreshController();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _homeBloc.getCovidSummaryData();
+    _homeBloc.getCovidSummaryStream().listen((ResponseOb responseOb) {
+      if(responseOb.msgState == MsgState.data){
+        refreshController.refreshCompleted();
+      }
+    });
   }
 
   @override
@@ -47,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ResponseOb responseOb = snapshot.data!;
           if (responseOb.msgState == MsgState.data) {
             SummaryOb summaryOb = responseOb.data;
-            return homeMainWidget(summaryOb);
+            return homeMainWidget(summaryOb,_homeBloc,refreshController);
           } else if (responseOb.msgState == MsgState.error) {
             if (responseOb.errState == ErrState.serverErr) {
               return const Center(
